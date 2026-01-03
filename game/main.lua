@@ -4,10 +4,11 @@ function love.load()
     skyData = love.image.newImageData("sky.png")
     bottomRed, bottomGreen, bottomBlue = skyData:getPixel(0, skyImage:getHeight() - 1)
     fighterImage = love.graphics.newImage("fighter.png")
+    enemyImage = love.graphics.newImage("fighter_orange.png")
     fireballImage = love.graphics.newImage("fireball.png")
     
 
-    screenWidth = love.graphics.getWidth()
+    screenWidth = love.graphics.getWidth() 
     screenHeight = love.graphics.getHeight()
     imageScale = math.max(screenWidth / skyImage:getWidth(), screenHeight / skyImage:getHeight())
     verticalOffset = -0.1 * skyImage:getHeight() * imageScale
@@ -78,7 +79,7 @@ function love.update(dt)
         for j, enemy in ipairs(enemies) do
             local shipWidth = fighterImage:getWidth() * 0.3
             local shipHeight = fighterImage:getHeight() * 0.3
-            if math.abs(bullet.x - enemy.x) < shipWidth/2 + 15 and math.abs(bullet.y - enemy.y) < shipHeight/2 + 15 then
+            if math.abs(bullet.x - enemy.x) < (shipWidth/2 + 15) * 2 and math.abs(bullet.y - enemy.y) < shipHeight/2 + 15 then
                 table.insert(bulletsToRemove, i)
                 table.insert(enemiesToRemove, j)
                 break
@@ -144,7 +145,7 @@ function love.draw()
     love.graphics.draw(fighterImage, fighterX - (fighterImage:getWidth() * 0.3) / 2, fighterY, 0, 0.3, 0.3)
 
     for _, enemy in ipairs(enemies) do
-        love.graphics.draw(fighterImage, enemy.x - (fighterImage:getWidth() * 0.3) / 2, enemy.y, enemy.angle, 0.3, 0.3)
+        love.graphics.draw(enemyImage, enemy.x - (enemyImage:getWidth() * 0.3) / 2, enemy.y, enemy.angle, 0.3, 0.3)
     end
 
     for _, bullet in ipairs(bullets) do
