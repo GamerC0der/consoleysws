@@ -8,7 +8,7 @@ function love.load()
     enemyImage = love.graphics.newImage("fighter_orange.png")
     fireballImage = love.graphics.newImage("fireball.png")
     
-    screenWidth = love.graphics.getWidth()
+    screenWidth = love.graphics.getWidth() 
     screenHeight = love.graphics.getHeight()
     imageScale = math.max(screenWidth / skyImage:getWidth(), screenHeight / skyImage:getHeight())
     verticalOffset = -0.1 * skyImage:getHeight() * imageScale
@@ -26,6 +26,18 @@ function love.load()
     waves = {3, 5, 2, 1}
     currentWave = 1
     waveSpawnTimer = 0
+
+    quests = {
+        {
+            name = "Aerial Command",
+            description = "Move for 2.5s",
+            progress = 0,
+            maxProgress = 2.5,
+            completed = false
+        }
+    }
+    movementTime = 0
+    lastMovementTime = 0
 end
 
 function love.keypressed() gameState = "playing" end
@@ -46,10 +58,31 @@ function love.update(dt)
     end
     if gameState ~= "playing" then return end
 
-    if love.keyboard.isDown("left") then fighterX = math.max(fighterImage:getWidth() * 0.15 * scale, fighterX - 200 * scale * dt) end
-    if love.keyboard.isDown("right") then fighterX = math.min(screenWidth - fighterImage:getWidth() * 0.15 * scale, fighterX + 200 * scale * dt) end
-    if love.keyboard.isDown("up") then fighterY = math.max(0, fighterY - 200 * scale * dt) end
-    if love.keyboard.isDown("down") then fighterY = math.min(screenHeight - fighterImage:getHeight() * 0.3 * scale, fighterY + 200 * scale * dt) end
+    local isMoving = false
+    if love.keyboard.isDown("left") then
+        fighterX = math.max(fighterImage:getWidth() * 0.15 * scale, fighterX - 200 * scale * dt)
+        isMoving = true
+    end
+    if love.keyboard.isDown("right") then
+        fighterX = math.min(screenWidth - fighterImage:getWidth() * 0.15 * scale, fighterX + 200 * scale * dt)
+        isMoving = true
+    end
+    if love.keyboard.isDown("up") then
+        fighterY = math.max(0, fighterY - 200 * scale * dt)
+        isMoving = true
+    end
+    if love.keyboard.isDown("down") then
+        fighterY = math.min(screenHeight - fighterImage:getHeight() * 0.3 * scale, fighterY + 200 * scale * dt)
+        isMoving = true
+    end
+
+    if isMoving then
+        movementTime = movementTime + dt
+    end
+    quests[1].progress = math.min(quests[1].maxProgress, movementTime)
+    if movementTime >= quests[1].maxProgress and not quests[1].completed then
+        quests[1].completed = true
+    end
 
     if love.keyboard.isDown("space") then
         if not spaceHeld then
@@ -107,7 +140,7 @@ function love.update(dt)
                     time = love.math.random() * math.pi * 2,
                     direction = 1,
                     speedX = love.math.random(-150, 150) * scale,
-                    speedY = love.math.random(80, 120) * scale
+                    speedY = love.math.random(80, 120) * scale 
                 })
             end
             currentWave = currentWave + 1
@@ -174,6 +207,26 @@ function love.draw()
         love.graphics.setFont(love.graphics.getFont())
         return
     end
+
+    local quest = quests[1]
+    local qx, qy = screenWidth - 220, 20
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", qx, qy, 200, 80)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("line", qx, qy, 200, 80)
+    love.graphics.setFont(love.graphics.newFont("Jersey10-Regular.ttf", 16))
+    love.graphics.print("Quest Log", qx + 5, qy + 5)
+    love.graphics.setFont(love.graphics.newFont("Jersey10-Regular.ttf", 12))
+    love.graphics.setColor(quest.completed and 0 or 1, 1, quest.completed and 0 or 1)
+    love.graphics.print(quest.name, qx + 5, qy + 25)
+    love.graphics.print(quest.description, qx + 5, qy + 40)
+    love.graphics.setColor(0.2, 0.2, 0.2)
+    love.graphics.rectangle("fill", qx + 5, qy + 55, 180, 8)
+    love.graphics.setColor(0, 1, 0)
+    love.graphics.rectangle("fill", qx + 5, qy + 55, 180 * quest.progress / quest.maxProgress, 8)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("line", qx + 5, qy + 55, 180, 8)
+    love.graphics.setFont(love.graphics.getFont())
 
     love.graphics.setColor(bottomRed, bottomGreen, bottomBlue)
     love.graphics.rectangle("fill", 0, screenHeight * 0.9, screenWidth, screenHeight * 0.1)

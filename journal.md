@@ -29,3 +29,9 @@ Here's a simple main menu that uses sky.png, its really simple and doesn't look 
 ![Screenshot 4](screenshot4.png)
 
 This uses a nice pixel font I found (pixelify sans) from Google Fonts which makes it look a tad better but still not what I was hoping for.
+
+# Day 2 
+
+![Screenshot 5](screenshot5.png)
+
+I added a quest log feature with currently only one quest, I'm gonna work on the next one after I push this, and it aims to make you familar with movement (maybe the next one will be shooting enemys I think).
