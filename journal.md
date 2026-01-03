@@ -35,3 +35,10 @@ This uses a nice pixel font I found (pixelify sans) from Google Fonts which make
 ![Screenshot 5](screenshot5.png)
 
 I added a quest log feature with currently only one quest, I'm gonna work on the next one after I push this, and it aims to make you familar with movement (maybe the next one will be shooting enemys I think).
+
+So the second one I added ended up two quests:
+
+- Rapid Fire (shoot three times)
+- Total Victory (complete the current part of the game)
+
+They work but Total Victory might be bad, but ehhh I'll get to it later.

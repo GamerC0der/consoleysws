@@ -33,11 +33,30 @@ function love.load()
             description = "Move for 2.5s",
             progress = 0,
             maxProgress = 2.5,
-            completed = false
+            completed = false,
+            unlocked = true
+        },
+        {
+            name = "Rapid Fire",
+            description = "Shoot 3 times",
+            progress = 0,
+            maxProgress = 3,
+            completed = false,
+            unlocked = false
+        },
+        {
+            name = "Total Victory",
+            description = "Defeat all enemies",
+            progress = 0,
+            maxProgress = 11,
+            completed = false,
+            unlocked = false
         }
     }
     movementTime = 0
     lastMovementTime = 0
+    shotsFired = 0
+    enemiesDefeated = 0
 end
 
 function love.keypressed() gameState = "playing" end
@@ -79,9 +98,13 @@ function love.update(dt)
     if isMoving then
         movementTime = movementTime + dt
     end
-    quests[1].progress = math.min(quests[1].maxProgress, movementTime)
-    if movementTime >= quests[1].maxProgress and not quests[1].completed then
-        quests[1].completed = true
+    if quests[1].unlocked and not quests[1].completed then
+        quests[1].progress = math.min(quests[1].maxProgress, movementTime)
+        if movementTime >= quests[1].maxProgress then
+            quests[1].completed = true
+            quests[2].unlocked = true
+            quests[3].unlocked = true
+        end
     end
 
     if love.keyboard.isDown("space") then
@@ -90,9 +113,11 @@ function love.update(dt)
             spaceHeld = true
             table.insert(bullets, {x = fighterX, y = fighterY - fighterImage:getHeight() * 0.3 * scale * 0.5})
             lastShotTime = love.timer.getTime()
+            shotsFired = shotsFired + 1
         elseif love.timer.getTime() - spacePressedTime > 1.5 and love.timer.getTime() - lastShotTime > 0.15 then
             table.insert(bullets, {x = fighterX, y = fighterY - fighterImage:getHeight() * 0.3 * scale * 0.5})
             lastShotTime = love.timer.getTime()
+            shotsFired = shotsFired + 1
         end
     else
         spaceHeld = false
@@ -125,6 +150,7 @@ function love.update(dt)
     end
     for i = #enemiesToRemove, 1, -1 do
         table.remove(enemies, enemiesToRemove[i])
+        enemiesDefeated = enemiesDefeated + 1
     end
 
     if #enemies == 0 then
@@ -189,9 +215,23 @@ function love.update(dt)
                     enemy1.x = enemy1.x + nx * separation
                     enemy1.y = enemy1.y + ny * separation
                     enemy2.x = enemy2.x - nx * separation
-                    enemy2.y = enemy2.y - ny * separation
+                    enemy2.y = enemy2.y - ny * separation 
                 end
             end
+        end
+    end
+
+    if quests[2].unlocked and not quests[2].completed then
+        quests[2].progress = math.min(quests[2].maxProgress, shotsFired)
+        if shotsFired >= quests[2].maxProgress then
+            quests[2].completed = true
+        end
+    end
+
+    if quests[3].unlocked and not quests[3].completed then
+        quests[3].progress = math.min(quests[3].maxProgress, enemiesDefeated)
+        if enemiesDefeated >= quests[3].maxProgress then
+            quests[3].completed = true
         end
     end
 end
@@ -208,24 +248,39 @@ function love.draw()
         return
     end
 
-    local quest = quests[1]
-    local qx, qy = screenWidth - 220, 20
+    local qx, qy = screenWidth - 220, 10
+    local questHeight = quests[2].unlocked and 81 or 40
+    local unlockedCount = 0
+    for _, quest in ipairs(quests) do
+        if quest.unlocked and not quest.completed then
+            unlockedCount = unlockedCount + 1
+        end
+    end
+    local totalHeight = 30 + (unlockedCount * questHeight)
     love.graphics.setColor(0, 0, 0, 0.7)
-    love.graphics.rectangle("fill", qx, qy, 200, 80)
+    love.graphics.rectangle("fill", qx, qy, 200, totalHeight)
     love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle("line", qx, qy, 200, 80)
+    love.graphics.rectangle("line", qx, qy, 200, totalHeight)
     love.graphics.setFont(love.graphics.newFont("Jersey10-Regular.ttf", 16))
     love.graphics.print("Quest Log", qx + 5, qy + 5)
     love.graphics.setFont(love.graphics.newFont("Jersey10-Regular.ttf", 12))
-    love.graphics.setColor(quest.completed and 0 or 1, 1, quest.completed and 0 or 1)
-    love.graphics.print(quest.name, qx + 5, qy + 25)
-    love.graphics.print(quest.description, qx + 5, qy + 40)
-    love.graphics.setColor(0.2, 0.2, 0.2)
-    love.graphics.rectangle("fill", qx + 5, qy + 55, 180, 8)
-    love.graphics.setColor(0, 1, 0)
-    love.graphics.rectangle("fill", qx + 5, qy + 55, 180 * quest.progress / quest.maxProgress, 8)
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle("line", qx + 5, qy + 55, 180, 8)
+
+    local visibleIndex = 0
+    for i, quest in ipairs(quests) do
+        if quest.unlocked and not quest.completed then
+            local questY = qy + 20 + (visibleIndex * questHeight)
+            love.graphics.setColor(quest.completed and 0 or 1, 1, quest.completed and 0 or 1)
+            love.graphics.print(quest.name, qx + 5, questY + 5)
+            love.graphics.print(quest.description, qx + 5, questY + 20)
+            love.graphics.setColor(0.2, 0.2, 0.2)
+            love.graphics.rectangle("fill", qx + 5, questY + 35, 180, 8)
+            love.graphics.setColor(0, 1, 0)
+            love.graphics.rectangle("fill", qx + 5, questY + 35, 180 * quest.progress / quest.maxProgress, 8)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", qx + 5, questY + 35, 180, 8)
+            visibleIndex = visibleIndex + 1
+        end
+    end
     love.graphics.setFont(love.graphics.getFont())
 
     love.graphics.setColor(bottomRed, bottomGreen, bottomBlue)
