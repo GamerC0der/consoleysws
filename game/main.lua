@@ -1,4 +1,5 @@
 function love.load()
+    gameState = "menu"
     skyImage = love.graphics.newImage("sky.png")
     skyImage:setFilter("nearest", "nearest")
     skyData = love.image.newImageData("sky.png")
@@ -27,6 +28,8 @@ function love.load()
     waveSpawnTimer = 0
 end
 
+function love.keypressed() gameState = "playing" end
+
 function love.resize(width, height)
 
     screenWidth = width
@@ -38,6 +41,7 @@ end
 
 function love.update(dt)
     scrollPosition = scrollPosition + 50 * scale * dt
+    if gameState ~= "playing" then return end
     if scrollPosition >= skyImage:getWidth() * imageScale then
         scrollPosition = scrollPosition - skyImage:getWidth() * imageScale
     end
@@ -161,6 +165,15 @@ end
 
 function love.draw()
     love.graphics.draw(skyImage, -scrollPosition, verticalOffset, 0, imageScale, imageScale)
+    love.graphics.draw(skyImage, -scrollPosition + skyImage:getWidth() * imageScale, verticalOffset, 0, imageScale, imageScale)
+
+    if gameState == "menu" then
+        love.graphics.setFont(love.graphics.newFont(48))
+        love.graphics.printf("Attack", 0, screenHeight/2 - 24, screenWidth, "center")
+        love.graphics.printf("Press any key to play", 0, screenHeight - 60, screenWidth, "center")
+        love.graphics.setFont(love.graphics.getFont())
+        return
+    end
     love.graphics.draw(skyImage, -scrollPosition + skyImage:getWidth() * imageScale, verticalOffset, 0, imageScale, imageScale)
 
     love.graphics.setColor(bottomRed, bottomGreen, bottomBlue)

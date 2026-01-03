@@ -20,3 +20,7 @@ Here's a screenshot of what I have at the start of today, the player looks decen
 
 I quickly edited the enemy fighter to be orange so it doesn't look as jarring, it's not my finest work but it's good for now.
 
+The system for enemy movement was redid, it feels better but its also feeling very slow. I'm just not sure how to make it feel right not gonna lie.
+
+![Screenshot 3](screenshot3.png)
+
