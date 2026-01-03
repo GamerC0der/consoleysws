@@ -7,58 +7,54 @@ function love.load()
     enemyImage = love.graphics.newImage("fighter_orange.png")
     fireballImage = love.graphics.newImage("fireball.png")
     
-
-    screenWidth = love.graphics.getWidth() 
+    screenWidth = love.graphics.getWidth()
     screenHeight = love.graphics.getHeight()
     imageScale = math.max(screenWidth / skyImage:getWidth(), screenHeight / skyImage:getHeight())
     verticalOffset = -0.1 * skyImage:getHeight() * imageScale
+    scale = math.min(screenWidth / 800, screenHeight / 600)
 
     scrollPosition = 0
     fighterX = screenWidth / 2
-    fighterY = screenHeight - fighterImage:getHeight() * 0.3
+    fighterY = screenHeight - fighterImage:getHeight() * 0.3 * scale
     bullets = {}
     spacePressedTime = 0
     lastShotTime = 0
     spaceHeld = false
 
     enemies = {}
-    for i = 1, 4 do
-        table.insert(enemies, {
-            x = screenWidth / 2 + (i - 2) * 60,
-            y = screenHeight * 0.05,
-            angle = math.pi,
-            time = i * 0.5,
-            direction = 1
-        })
-    end
+    waves = {3, 5, 2, 1}
+    currentWave = 1
+    waveSpawnTimer = 0
 end
 
 function love.resize(width, height)
+
     screenWidth = width
     screenHeight = height
-    imageScale = math.max(screenWidth / skyImage:getWidth(), screenHeight / skyImage:getHeight())
+    imageScale = math.max(screenWidth / skyImage:getWidth(), screenHeight / skyImage:getHeight()) 
     verticalOffset = -0.1 * skyImage:getHeight() * imageScale
+    scale = math.min(screenWidth / 800, screenHeight / 600)
 end
 
 function love.update(dt)
-    scrollPosition = scrollPosition + 50 * dt
+    scrollPosition = scrollPosition + 50 * scale * dt
     if scrollPosition >= skyImage:getWidth() * imageScale then
         scrollPosition = scrollPosition - skyImage:getWidth() * imageScale
     end
 
-    if love.keyboard.isDown("left") then fighterX = math.max(fighterImage:getWidth() * 0.15, fighterX - 200 * dt) end
-    if love.keyboard.isDown("right") then fighterX = math.min(screenWidth - fighterImage:getWidth() * 0.15, fighterX + 200 * dt) end
-    if love.keyboard.isDown("up") then fighterY = math.max(0, fighterY - 200 * dt) end
-    if love.keyboard.isDown("down") then fighterY = math.min(screenHeight - fighterImage:getHeight() * 0.3, fighterY + 200 * dt) end
+    if love.keyboard.isDown("left") then fighterX = math.max(fighterImage:getWidth() * 0.15 * scale, fighterX - 200 * scale * dt) end
+    if love.keyboard.isDown("right") then fighterX = math.min(screenWidth - fighterImage:getWidth() * 0.15 * scale, fighterX + 200 * scale * dt) end
+    if love.keyboard.isDown("up") then fighterY = math.max(0, fighterY - 200 * scale * dt) end
+    if love.keyboard.isDown("down") then fighterY = math.min(screenHeight - fighterImage:getHeight() * 0.3 * scale, fighterY + 200 * scale * dt) end
 
     if love.keyboard.isDown("space") then
         if not spaceHeld then
             spacePressedTime = love.timer.getTime()
             spaceHeld = true
-            table.insert(bullets, {x = fighterX, y = fighterY - fighterImage:getHeight() * 0.3 * 0.5})
+            table.insert(bullets, {x = fighterX, y = fighterY - fighterImage:getHeight() * 0.3 * scale * 0.5})
             lastShotTime = love.timer.getTime()
         elseif love.timer.getTime() - spacePressedTime > 1.5 and love.timer.getTime() - lastShotTime > 0.15 then
-            table.insert(bullets, {x = fighterX, y = fighterY - fighterImage:getHeight() * 0.3 * 0.5})
+            table.insert(bullets, {x = fighterX, y = fighterY - fighterImage:getHeight() * 0.3 * scale * 0.5})
             lastShotTime = love.timer.getTime()
         end
     else
@@ -66,7 +62,7 @@ function love.update(dt)
     end
 
     for i = #bullets, 1, -1 do
-        bullets[i].y = bullets[i].y - 400 * dt
+        bullets[i].y = bullets[i].y - 400 * scale * dt
         if bullets[i].y < -10 then
             table.remove(bullets, i)
         end
@@ -77,9 +73,9 @@ function love.update(dt)
 
     for i, bullet in ipairs(bullets) do
         for j, enemy in ipairs(enemies) do
-            local shipWidth = fighterImage:getWidth() * 0.3
-            local shipHeight = fighterImage:getHeight() * 0.3
-            if math.abs(bullet.x - enemy.x) < (shipWidth/2 + 15) * 2 and math.abs(bullet.y - enemy.y) < shipHeight/2 + 15 then
+            local shipWidth = fighterImage:getWidth() * 0.3 * scale
+            local shipHeight = fighterImage:getHeight() * 0.3 * scale 
+            if math.abs(bullet.x - enemy.x) < (shipWidth/2 + 15 * scale) * 2 and math.abs(bullet.y - enemy.y) < shipHeight/2 + 15 * scale then
                 table.insert(bulletsToRemove, i)
                 table.insert(enemiesToRemove, j)
                 break
@@ -94,20 +90,49 @@ function love.update(dt)
         table.remove(enemies, enemiesToRemove[i])
     end
 
+    if #enemies == 0 then
+        waveSpawnTimer = waveSpawnTimer + dt
+        if waveSpawnTimer >= 1 then
+            for i = 1, waves[currentWave % #waves + 1] do
+                local enemyX = love.math.random(fighterImage:getWidth() * 0.3 * scale, screenWidth - fighterImage:getWidth() * 0.3 * scale)
+                table.insert(enemies, {
+                    x = enemyX,
+                    initialX = enemyX,
+                    y = screenHeight * 0.25,
+                    angle = math.pi,
+                    time = love.math.random() * math.pi * 2,
+                    direction = 1,
+                    speedX = love.math.random(-150, 150) * scale,
+                    speedY = love.math.random(80, 120) * scale
+                })
+            end
+            currentWave = currentWave + 1
+            waveSpawnTimer = 0
+        end
+
+    end
+
     for _, enemy in ipairs(enemies) do
         enemy.time = enemy.time + dt
-        enemy.x = screenWidth / 2 + math.cos(enemy.time) * 100 + math.sin(enemy.time * 2) * 50
-        enemy.y = enemy.y + 100 * dt * enemy.direction
-        enemy.angle = math.pi
+        enemy.x = enemy.x + enemy.speedX * dt
+        enemy.y = enemy.y + (screenHeight * 0.3 / 30) * dt * 1.5
 
-        local shipWidth = fighterImage:getWidth() * 0.3
-        enemy.x = math.max(shipWidth / 2, math.min(screenWidth - shipWidth / 2, enemy.x))
+        local shipWidth = fighterImage:getWidth() * 0.3 * scale
+        local leftLimit = enemy.initialX - screenWidth * 0.15
+        local rightLimit = enemy.initialX + screenWidth * 0.15
+        if enemy.x < leftLimit or enemy.x > rightLimit then
+            enemy.speedX = -enemy.speedX
+        end
+        enemy.x = math.max(leftLimit, math.min(rightLimit, enemy.x))
 
-        if enemy.y > screenHeight / 2 and enemy.direction == 1 then
-            enemy.direction = -1
-        elseif enemy.y < screenHeight * 0.05 and enemy.direction == -1 then
-            enemy.direction = 1
-            enemy.time = 0
+        if enemy.time % 2 < 1 then
+            enemy.speedX = enemy.speedX + (love.math.random() - 0.5) * 100 * dt
+            enemy.speedX = math.max(-450 * scale, math.min(450 * scale, enemy.speedX))
+        end
+
+        if enemy.y > screenHeight * 0.8 then
+            enemy.y = screenHeight * 0.25
+            enemy.x = enemy.initialX
         end
     end
 
@@ -117,7 +142,7 @@ function love.update(dt)
                 local dx = enemy1.x - enemy2.x
                 local dy = enemy1.y - enemy2.y
                 local distance = math.sqrt(dx * dx + dy * dy)
-                local minDistance = 150
+                local minDistance = 150 * scale
 
                 if distance < minDistance and distance > 0 then
                     local separation = (minDistance - distance) * 0.5
@@ -142,13 +167,13 @@ function love.draw()
     love.graphics.rectangle("fill", 0, screenHeight * 0.9, screenWidth, screenHeight * 0.1)
     love.graphics.setColor(1, 1, 1)
 
-    love.graphics.draw(fighterImage, fighterX - (fighterImage:getWidth() * 0.3) / 2, fighterY, 0, 0.3, 0.3)
+    love.graphics.draw(fighterImage, fighterX - (fighterImage:getWidth() * 0.3 * scale) / 2, fighterY, 0, 0.3 * scale, 0.3 * scale)
 
     for _, enemy in ipairs(enemies) do
-        love.graphics.draw(enemyImage, enemy.x - (enemyImage:getWidth() * 0.3) / 2, enemy.y, enemy.angle, 0.3, 0.3)
+        love.graphics.draw(enemyImage, enemy.x - (enemyImage:getWidth() * 0.3 * scale) / 2, enemy.y, enemy.angle, 0.3 * scale, 0.3 * scale)
     end
 
     for _, bullet in ipairs(bullets) do
-        love.graphics.draw(fireballImage, bullet.x - fireballImage:getWidth() / 24, bullet.y - fireballImage:getHeight() / 24, 0, 1/12, 1/12)
+        love.graphics.draw(fireballImage, bullet.x - fireballImage:getWidth() / (24 / scale), bullet.y - fireballImage:getHeight() / (24 / scale), 0, (1/12) * scale, (1/12) * scale)
     end
 end

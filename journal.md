@@ -10,4 +10,13 @@ Decisions, decisions, decisions. What about a shmup? (Shoot 'em up), I added a p
 
 # Day 1
 
-I increased the enemies to 4 (instead of 3) and fixed a bug where you can't kill the final enemy! 
+I increased the enemies to 4 (instead of 3) and fixed a bug where you can't kill the final enemy!
+
+![Day 1 Screenshot](screenshot1.png) 
+
+Here's a screenshot of what I have at the start of today, the player looks decent but the enemy uses the same sprite which looks weird
+
+![New Orange Fighter](screenshot2.png)
+
+I quickly edited the enemy fighter to be orange so it doesn't look as jarring, it's not my finest work but it's good for now.
+
