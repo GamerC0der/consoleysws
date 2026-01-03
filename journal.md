@@ -24,3 +24,8 @@ The system for enemy movement was redid, it feels better but its also feeling ve
 
 ![Screenshot 3](screenshot3.png)
 
+Here's a simple main menu that uses sky.png, its really simple and doesn't look great but it works simply usign a type to play method (or buttons once they come)
+
+![Screenshot 4](screenshot4.png)
+
+This uses a nice pixel font I found (pixelify sans) from Google Fonts which makes it look a tad better but still not what I was hoping for.

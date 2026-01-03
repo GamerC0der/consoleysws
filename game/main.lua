@@ -41,10 +41,10 @@ end
 
 function love.update(dt)
     scrollPosition = scrollPosition + 50 * scale * dt
-    if gameState ~= "playing" then return end
     if scrollPosition >= skyImage:getWidth() * imageScale then
         scrollPosition = scrollPosition - skyImage:getWidth() * imageScale
     end
+    if gameState ~= "playing" then return end
 
     if love.keyboard.isDown("left") then fighterX = math.max(fighterImage:getWidth() * 0.15 * scale, fighterX - 200 * scale * dt) end
     if love.keyboard.isDown("right") then fighterX = math.min(screenWidth - fighterImage:getWidth() * 0.15 * scale, fighterX + 200 * scale * dt) end
@@ -168,13 +168,12 @@ function love.draw()
     love.graphics.draw(skyImage, -scrollPosition + skyImage:getWidth() * imageScale, verticalOffset, 0, imageScale, imageScale)
 
     if gameState == "menu" then
-        love.graphics.setFont(love.graphics.newFont(48))
+        love.graphics.setFont(love.graphics.newFont("Jersey10-Regular.ttf", 48))
         love.graphics.printf("Attack", 0, screenHeight/2 - 24, screenWidth, "center")
         love.graphics.printf("Press any key to play", 0, screenHeight - 60, screenWidth, "center")
         love.graphics.setFont(love.graphics.getFont())
         return
     end
-    love.graphics.draw(skyImage, -scrollPosition + skyImage:getWidth() * imageScale, verticalOffset, 0, imageScale, imageScale)
 
     love.graphics.setColor(bottomRed, bottomGreen, bottomBlue)
     love.graphics.rectangle("fill", 0, screenHeight * 0.9, screenWidth, screenHeight * 0.1)
